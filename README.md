@@ -1,3 +1,6 @@
+# Colab notebook
+["gpt-2 colab"](https://colab.research.google.com/github/amarten1/gpt-2/blob/master/gpt_2.ipynb)
+
 **Status:** Archive (code is provided as-is, no updates expected)
 
 # gpt-2
