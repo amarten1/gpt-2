@@ -1,15 +1,21 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.contrib.training import HParams
+from tensorboard.plugins.hparams import api as hp
 
-def default_hparams():
-    return HParams(
-        n_vocab=0,
-        n_ctx=1024,
-        n_embd=768,
-        n_head=12,
-        n_layer=12,
-    )
+# def default_hparams():
+#     return HParams(
+#         n_vocab=0,
+#         n_ctx=1024,
+#         n_embd=768,
+#         n_head=12,
+#         n_layer=12,
+#     )
+
+N_VOCAB = hp.HParam('n_vocab', 0)
+N_CTX = hp.HParam('n_ctx', 1024)
+N_EMBD = hp.HParam('n_embd', 768)
+N_HEAD = hp.HParam('n_head', 12)
+N_LAYER = hp.HParam('n_layer', 12)
 
 def shape_list(x):
     """Deal with dynamic shape in tensorflow cleanly."""
@@ -27,10 +33,10 @@ def gelu(x):
 
 def norm(x, scope, *, axis=-1, epsilon=1e-5):
     """Normalize to mean = 0, std = 1, then do a diagonal affine transform."""
-    with tf.variable_scope(scope):
+    with tf.compat.v1.variable_scope(scope):
         n_state = x.shape[-1].value
-        g = tf.get_variable('g', [n_state], initializer=tf.constant_initializer(1))
-        b = tf.get_variable('b', [n_state], initializer=tf.constant_initializer(0))
+        g = tf.compat.v1.get_variable('g', [n_state], initializer=tf.constant_initializer(1))
+        b = tf.compat.v1.get_variable('b', [n_state], initializer=tf.constant_initializer(0))
         u = tf.reduce_mean(x, axis=axis, keepdims=True)
         s = tf.reduce_mean(tf.square(x-u), axis=axis, keepdims=True)
         x = (x - u) * tf.math.rsqrt(s + epsilon)
@@ -48,10 +54,10 @@ def merge_states(x):
     return tf.reshape(x, start + [a*b])
 
 def conv1d(x, scope, nf, *, w_init_stdev=0.02):
-    with tf.variable_scope(scope):
+    with tf.compat.v1.variable_scope(scope):
         *start, nx = shape_list(x)
-        w = tf.get_variable('w', [1, nx, nf], initializer=tf.random_normal_initializer(stddev=w_init_stdev))
-        b = tf.get_variable('b', [nf], initializer=tf.constant_initializer(0))
+        w = tf.compat.v1.get_variable('w', [1, nx, nf], initializer=tf.random_normal_initializer(stddev=w_init_stdev))
+        b = tf.compat.v1.get_variable('b', [nf], initializer=tf.constant_initializer(0))
         c = tf.reshape(tf.matmul(tf.reshape(x, [-1, nx]), tf.reshape(w, [-1, nf]))+b, start+[nf])
         return c
 
@@ -91,14 +97,14 @@ def attn(x, scope, n_state, *, past, hparams):
     def multihead_attn(q, k, v):
         # q, k, v have shape [batch, heads, sequence, features]
         w = tf.matmul(q, k, transpose_b=True)
-        w = w * tf.rsqrt(tf.cast(v.shape[-1].value, w.dtype))
+        w = w * tf.math.rsqrt(tf.cast(v.shape[-1].value, w.dtype))
 
         w = mask_attn_weights(w)
         w = softmax(w)
         a = tf.matmul(w, v)
         return a
 
-    with tf.variable_scope(scope):
+    with tf.compat.v1.variable_scope(scope):
         c = conv1d(x, 'c_attn', n_state*3)
         q, k, v = map(split_heads, tf.split(c, 3, axis=2))
         present = tf.stack([k, v], axis=1)
@@ -113,7 +119,7 @@ def attn(x, scope, n_state, *, past, hparams):
 
 
 def mlp(x, scope, n_state, *, hparams):
-    with tf.variable_scope(scope):
+    with tf.compat.v1.variable_scope(scope):
         nx = x.shape[-1].value
         h = gelu(conv1d(x, 'c_fc', n_state))
         h2 = conv1d(h, 'c_proj', nx)
@@ -121,7 +127,7 @@ def mlp(x, scope, n_state, *, hparams):
 
 
 def block(x, scope, *, past, hparams):
-    with tf.variable_scope(scope):
+    with tf.compat.v1.variable_scope(scope):
         nx = x.shape[-1].value
         a, present = attn(norm(x, 'ln_1'), 'attn', nx, past=past, hparams=hparams)
         x = x + a
