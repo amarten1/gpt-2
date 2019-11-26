@@ -11,11 +11,11 @@ from tensorboard.plugins.hparams import api as hp
 #         n_layer=12,
 #     )
 
-N_VOCAB = hp.HParam('n_vocab', hp.Discrete(0, dtype=tf.int32))
-N_CTX = hp.HParam('n_ctx', hp.Discrete(1024, dtype=tf.int32))
-N_EMBD = hp.HParam('n_embd', hp.Discrete(768, dtype=tf.int32))
-N_HEAD = hp.HParam('n_head', hp.Discrete(12, dtype=tf.int32))
-N_LAYER = hp.HParam('n_layer', hp.Discrete(12, dtype=tf.int32))
+N_VOCAB = hp.HParam('n_vocab', hp.Discrete(0))
+N_CTX = hp.HParam('n_ctx', hp.Discrete(1024))
+N_EMBD = hp.HParam('n_embd', hp.Discrete(768))
+N_HEAD = hp.HParam('n_head', hp.Discrete(12))
+N_LAYER = hp.HParam('n_layer', hp.Discrete(12))
 
 def shape_list(x):
     """Deal with dynamic shape in tensorflow cleanly."""
