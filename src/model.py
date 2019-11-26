@@ -2,20 +2,22 @@ import numpy as np
 import tensorflow as tf
 from tensorboard.plugins.hparams import api as hp
 
-# def default_hparams():
-#     return HParams(
-#         n_vocab=0,
-#         n_ctx=1024,
-#         n_embd=768,
-#         n_head=12,
-#         n_layer=12,
-#     )
+def default_hparams():
+    #HParams = {'n_vocab'=0,'n_ctx'=1024,'n_embd'=768,'n_head'=12,'n_layer'=12,}
+    return {'n_vocab':0,'n_ctx':1024,'n_embd':768,'n_head':12,'n_layer':12}
+    # (
+    #     n_vocab=0,
+    #     n_ctx=1024,
+    #     n_embd=768,
+    #     n_head=12,
+    #     n_layer=12,
+    # )
 
-N_VOCAB = hp.HParam('n_vocab', hp.Discrete(0))
-N_CTX = hp.HParam('n_ctx', hp.Discrete(1024))
-N_EMBD = hp.HParam('n_embd', hp.Discrete(768))
-N_HEAD = hp.HParam('n_head', hp.Discrete(12))
-N_LAYER = hp.HParam('n_layer', hp.Discrete(12))
+# N_VOCAB = hp.HParam('n_vocab', hp.Discrete([0]))
+# N_CTX = hp.HParam('n_ctx', hp.Discrete(1024))
+# N_EMBD = hp.HParam('n_embd', hp.Discrete(768))
+# N_HEAD = hp.HParam('n_head', hp.Discrete(12))
+# N_LAYER = hp.HParam('n_layer', hp.Discrete(12))
 
 def shape_list(x):
     """Deal with dynamic shape in tensorflow cleanly."""
